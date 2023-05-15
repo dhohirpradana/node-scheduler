@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  sjf:
+    image: 192.168.1.119:5000/node-scheduler
+    ports:
+      - "3333:3000"
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
