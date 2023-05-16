@@ -23,6 +23,18 @@ app.get('/jobs', (req, res) => {
 
 app.post('/jobs', (req, res) => {
     const uuid = uuidv4();
+
+    // Get current datetime
+    const now = new Date();
+
+    // Adjust to GMT+7
+    now.setHours(now.getHours() + 7);
+
+    // Format the datetime
+    const formattedDatetime = now.toISOString();
+
+    // console.log(formattedDatetime);
+
     // validate if no body
     if (!req.body) {
         return res.status(400).json({ message: 'body is required' });
@@ -74,7 +86,9 @@ app.post('/jobs', (req, res) => {
         // create http request every method
         var url = httpData.url;
 
-        if (url == "") {
+        // validate url format must http or https
+        var urlFormat = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+        if (!urlFormat.test(url)) {
             return res.status(400).json({ message: 'url is not valid' });
         }
 
@@ -96,9 +110,9 @@ app.post('/jobs', (req, res) => {
             }
         });
 
-        jobs.push({ id: uuid, type, data, schedule, task });
-        jobsString.push({ id: uuid, type, data, schedule });
-        res.status(201).json({ message: "Task added!", data: { id: uuid, ...httpData } });
+        jobs.push({ id: uuid, task });
+        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
+        res.status(201).json({ message: "Task added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
     } else if (type == "command") {
         // validate data must string
         if (typeof data !== 'string') {
@@ -126,9 +140,9 @@ app.post('/jobs', (req, res) => {
             }
         });
 
-        jobs.push({ id: uuid, type, data, schedule, task });
-        jobsString.push({ id: uuid, type, data, schedule });
-        res.status(201).json({ message: "Task added!", data: { id: uuid, ...command } });
+        jobs.push({ id: uuid, task });
+        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
+        res.status(201).json({ message: "Task added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
     }
 });
 
