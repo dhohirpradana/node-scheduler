@@ -14,7 +14,7 @@ const jobs = [];
 const jobsString = [];
 
 app.get('/', (req, res) => {
-    res.send('<h1>Node Scheduler</h1>');
+    res.send('<h1>Node Scheduler v1.0.3</h1>');
 });
 
 app.get('/jobs', (req, res) => {
