@@ -73,6 +73,11 @@ app.post('/jobs', (req, res) => {
 
         // create http request every method
         var url = httpData.url;
+
+        if (url == "") {
+            return res.status(400).json({ message: 'url is not valid' });
+        }
+
         var method = httpData.method;
         var headers = httpData.headers;
         var body = httpData.body;
