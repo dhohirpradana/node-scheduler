@@ -87,8 +87,10 @@ app.post('/jobs', (req, res) => {
         var url = httpData.url;
 
         // validate url format must http or https
-        var urlFormat = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-        if (!urlFormat.test(url)) {
+        var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+        var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+        if (!urlFormat.test(url) && !urlFormatHttp.test(url)) {
             return res.status(400).json({ message: 'url is not valid' });
         }
 
