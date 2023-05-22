@@ -4,8 +4,12 @@ const cron = require('node-cron');
 const { exec } = require('child_process');
 const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
+const https = require('https');
+const fs = require('fs');
+const cors = require("cors");
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -14,7 +18,7 @@ const jobs = [];
 const jobsString = [];
 
 app.get('/', (req, res) => {
-    res.send('<h1>Node Scheduler v1.0.3</h1>');
+    res.send('<h1>Node Scheduler v1.0.4</h1>');
 });
 
 app.get('/jobs', (req, res) => {
@@ -90,7 +94,7 @@ app.post('/jobs', (req, res) => {
         var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
         var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
 
-        if (!urlFormat.test(url) && !urlFormatHttp.test(url)) {
+        if (!urlFormatHttps.test(url) && !urlFormatHttp.test(url)) {
             return res.status(400).json({ message: 'url is not valid' });
         }
 
@@ -163,6 +167,15 @@ app.delete('/jobs/:id', (req, res) => {
     }
 });
 
-app.listen(3000, () => {
+// Read the SSL/TLS certificate and private key
+const options = {
+    cert: fs.readFileSync('cert.pem'),
+    key: fs.readFileSync('key.pem'),
+};
+
+// Create an HTTPS server
+const appHttps = https.createServer(options, app);
+
+appHttps.listen(3000, () => {
     console.log('Server running on port 3000');
 });
