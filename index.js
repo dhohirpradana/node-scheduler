@@ -7,7 +7,6 @@ const { v4: uuidv4 } = require('uuid');
 const https = require('https');
 const fs = require('fs');
 // const cors = require("cors");
-const https = require('https');
 
 const app = express();
 app.disable("x-powered-by");
