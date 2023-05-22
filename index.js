@@ -103,13 +103,17 @@ app.post('/job', (req, res) => {
         // create http request every method
         var url = httpData.url;
 
-        // validate url format must http or https
-        var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-        var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-
-        if (!urlFormatHttps.test(url) && !urlFormatHttp.test(url)) {
+        // validate url format must start with http:// or https://
+        if(!url.startsWith("https://") && !url.startsWith("http://")) {
             return res.status(400).json({ message: 'url is not valid' });
         }
+
+        // var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+        // var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+        // if (!urlFormatHttps.test(url) && !urlFormatHttp.test(url)) {
+        //     return res.status(400).json({ message: 'url is not valid' });
+        // }
 
         var method = httpData.method;
         var headers = httpData.headers;
@@ -130,8 +134,8 @@ app.post('/job', (req, res) => {
         });
 
         jobs.push({ id: uuid, task });
-        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
-        res.status(201).json({ message: "Job added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
+        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" });
+        res.status(201).json({ message: "Job added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" } });
     } else if (type == "command") {
         // validate data must string
         if (typeof data !== 'string') {
@@ -251,13 +255,18 @@ app.put('/job/:id', (req, res) => {
             // create http request every method
             var url = httpData.url;
 
-            // validate url format must http or https
-            var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-            var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-
-            if (!urlFormatHttps.test(url) && !urlFormatHttp.test(url)) {
+            // validate url format must start with http:// or https://
+            if(!url.startsWith("https://") && !url.startsWith("http://")) {
                 return res.status(400).json({ message: 'url is not valid' });
             }
+
+            // // validate url format must http or https
+            // var urlFormatHttps = /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+            // var urlFormatHttp = /^http?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+            // if (!urlFormatHttps.test(url) && !urlFormatHttp.test(url)) {
+            //     return res.status(400).json({ message: 'url is not valid' });
+            // }
 
             var method = httpData.method;
             var headers = httpData.headers;
@@ -308,10 +317,42 @@ app.put('/job/:id', (req, res) => {
             });
 
             jobs.push({ id: uuid, task });
-            jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
-            res.status(201).json({ message: "Task updated!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
+            jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" });
+            res.status(201).json({ message: "Task updated!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" } });
         }
 
+    } else {
+        res.status(404).json({ message: 'Job not found' });
+    }
+});
+
+// stop job
+app.put('/job/:id/stop', (req, res) => {
+    const id = req.params.id;
+    const job = jobs.find((job) => job.id === id);
+    if (job) {
+        // stop cron job
+        job.task.stop();
+        // update jobString status
+        const index = jobs.indexOf(job);
+        jobsString[index].status = "stopped";
+        res.json({ success: true, message: `Job ${id} stopped` });
+    } else {
+        res.status(404).json({ message: 'Job not found' });
+    }
+});
+
+// start job
+app.put('/job/:id/start', (req, res) => {
+    const id = req.params.id;
+    const job = jobs.find((job) => job.id === id);
+    if (job) {
+        // start cron job
+        job.task.start();
+        // update jobString status
+        const index = jobs.indexOf(job);
+        jobsString[index].status = "running";
+        res.json({ success: true, message: `Job ${id} started` });
     } else {
         res.status(404).json({ message: 'Job not found' });
     }
