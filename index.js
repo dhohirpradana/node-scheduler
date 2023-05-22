@@ -6,7 +6,8 @@ const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 const https = require('https');
 const fs = require('fs');
-const cors = require("cors");
+// const cors = require("cors");
+const https = require('https');
 
 const app = express();
 app.disable("x-powered-by");
@@ -20,6 +21,11 @@ var listMethod = ["GET", "POST", "PUT", "DELETE"];
 
 const jobs = [];
 const jobsString = [];
+
+// Create an instance of the HTTPS agent with SSL verification disabled
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 // get version
 app.get('/', (req, res) => {
@@ -104,7 +110,7 @@ app.post('/job', (req, res) => {
         var url = httpData.url;
 
         // validate url format must start with http:// or https://
-        if(!url.startsWith("https://") && !url.startsWith("http://")) {
+        if (!url.startsWith("https://") && !url.startsWith("http://")) {
             return res.status(400).json({ message: 'url is not valid' });
         }
 
@@ -125,7 +131,8 @@ app.post('/job', (req, res) => {
                     method: method,
                     url: url,
                     headers: headers,
-                    data: body
+                    data: body,
+                    httpsAgent: httpsAgent
                 });
                 console.log(response.data);
             } catch (error) {
@@ -256,7 +263,7 @@ app.put('/job/:id', (req, res) => {
             var url = httpData.url;
 
             // validate url format must start with http:// or https://
-            if(!url.startsWith("https://") && !url.startsWith("http://")) {
+            if (!url.startsWith("https://") && !url.startsWith("http://")) {
                 return res.status(400).json({ message: 'url is not valid' });
             }
 
@@ -278,7 +285,8 @@ app.put('/job/:id', (req, res) => {
                         method: method,
                         url: url,
                         headers: headers,
-                        data: body
+                        data: body,
+                        httpsAgent: httpsAgent
                     });
                     console.log(response.data);
                 } catch (error) {
