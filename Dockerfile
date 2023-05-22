@@ -6,6 +6,7 @@ COPY package.json package-lock.json ./
 
 RUN npm install --production
 
-COPY index.js ./
+# COPY index.js ./
+COPY . .
 
 CMD ["npm", "start"]
