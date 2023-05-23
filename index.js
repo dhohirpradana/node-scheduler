@@ -170,8 +170,8 @@ app.post('/job', (req, res) => {
         });
 
         jobs.push({ id: uuid, task });
-        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
-        res.status(201).json({ message: "Task added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
+        jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" });
+        res.status(201).json({ message: "Task added!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime, status: "running" } });
     }
 });
 
@@ -229,11 +229,21 @@ app.put('/job/:id', (req, res) => {
 
     const job = jobs.find((job) => job.id === id);
     if (job) {
-        // stop cron job
+        // stop job
         job.task.stop();
+        
         const index = jobs.indexOf(job);
         jobs.splice(index, 1);
-        jobsString.splice(index, 1);
+
+        var jobStatus = "running";
+
+        // get jobsString data
+        const jobString = jobsString.find((jobString) => jobString.id === id);
+        if (jobString) {
+            jobStatus = jobString.status;
+            const index = jobsString.indexOf(jobString);
+            jobsString.splice(index, 1);
+        }
 
         if (type == "httpRequest") {
             // parse data body
@@ -293,9 +303,15 @@ app.put('/job/:id', (req, res) => {
                 }
             });
 
+            // stop task if job status is not running
+            if (jobStatus != "running") {
+                task.stop();
+            }
+
             jobs.push({ id: uuid, task });
-            jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime });
-            res.status(201).json({ message: "Task updated!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime } });
+
+            jobsString.push({ id: uuid, type, data, schedule, created_at: formattedDatetime, status: jobStatus });
+            res.status(201).json({ message: "Task updated!", data: { id: uuid, type, data, schedule, created_at: formattedDatetime, status: jobStatus } });
         } else if (type == "command") {
             // validate data must string
             if (typeof data !== 'string') {
