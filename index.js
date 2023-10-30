@@ -298,6 +298,7 @@ app.delete('/job/:id', (req, res) => {
     if (index !== -1) {
         jobs.splice(index, 1);
         const jobsString = JSON.stringify(jobs);
+        jobsString.splice(index, 1);
         res.json({ success: true, message: `Job ${id} deleted`, jobs, jobsString });
     } else {
         res.status(404).json({ message: 'Job not found' });
