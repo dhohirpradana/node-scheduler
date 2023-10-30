@@ -307,6 +307,22 @@ app.delete('/job/:id', (req, res) => {
     saveJobsToFile();
 });
 
+// delete job where key = value
+app.delete('/job/:key/:value', (req, res) => {
+    const key = req.params.key;
+    const value = req.params.value;
+    const job = jobsString.find((job) => job[key] === value);
+    if (job) {
+        // stop cron job
+        const index = jobsString.indexOf(job);
+        jobsString.splice(index, 1);
+        res.json({ success: true, message: `Job ${value} deleted` });
+    } else {
+        res.status(404).json({ message: 'Job not found' });
+    }
+    saveJobsToFile();
+});
+
 // update job
 app.put('/job/:id', (req, res) => {
     const id = req.params.id;
