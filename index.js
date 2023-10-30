@@ -307,22 +307,40 @@ app.delete('/job/:id', (req, res) => {
     saveJobsToFile();
 });
 
-// delete all job where key = value
-app.delete('/job/:key/:value', (req, res) => {
-    const key = req.params.key;
+// delete all job where job.data.path = value
+app.delete('/job/body-path/:value', (req, res) => {
     const value = req.params.value;
-    // delete job where key = value loop
-    for (var i = 0; i < jobsString.length; i++) {
-        if (jobsString[i][key] == value) {
-            // stop cron job
-            jobs[i].task.stop();
-            jobs.splice(i, 1);
-            jobsString.splice(i, 1);
-            i--;
+    const decodedValue = decodeURIComponent(value);
+    var jobsDeleted = 0;
+
+    // check exist job with path body = value using filter
+    const jobsFilter = jobsString.filter((job) => job.data.body.path === decodedValue);
+
+    if (jobsFilter.length == 0) {
+        return res.status(404).json({ message: `Job with path body ${decodedValue} not found` });
+    }
+
+    function removeJob(index) {
+        try {
+            jobs[index].task.stop();
+            jobs.splice(index, 1);
+            jobsString.splice(index, 1);
+            jobsDeleted++;
+        } catch (error) {
+            console.log("Retry remove job");
+            removeJob();
         }
     }
+
+    // loop jobsFilter to delete job
+    jobsFilter.forEach((job) => {
+        // get index job
+        index = jobsString.indexOf(job);
+        removeJob(index);
+    });
+
     saveJobsToFile();
-    return res.json({ success: true, message: `Job ${key} = ${value} deleted` });
+    return res.json({ message: `Job with path body ${decodedValue} deleted`, total: jobsDeleted });
 });
 
 // update job
