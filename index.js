@@ -293,12 +293,14 @@ app.post('/job', (req, res) => {
 // delete job
 app.delete('/job/:id', (req, res) => {
     const id = req.params.id;
-    const index = jobs.findIndex((job) => job.id === id);
-
-    if (index !== -1) {
+    const job = jobs.find((job) => job.id === id);
+    if (job) {
+        // stop cron job
+        job.task.stop();
+        const index = jobs.indexOf(job);
         jobs.splice(index, 1);
         jobsString.splice(index, 1);
-        res.json({ success: true, message: `Job ${id} deleted`, jobs, jobsString });
+        res.json({ success: true, message: `Job ${id} deleted` });
     } else {
         res.status(404).json({ message: 'Job not found' });
     }
@@ -461,6 +463,7 @@ app.put('/job/:id', (req, res) => {
     } else {
         res.status(404).json({ message: 'Job not found' });
     }
+    saveJobsToFile();
 });
 
 // stop job
