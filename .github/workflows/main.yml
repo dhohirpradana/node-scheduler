@@ -1,0 +1,33 @@
+name: Docker Hub CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+
+    env:
+      REPO_NAME: ${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set ENV variables
+        run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}" >> $GITHUB_ENV
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag $REPO_NAME
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker tag $REPO_NAME "${{ secrets.DOCKERHUB_USERNAME }}/$REPO_NAME"
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/$REPO_NAME"
