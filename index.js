@@ -98,6 +98,9 @@ if (fs.existsSync('jobsData.json')) {
                         } catch (error) {
                             console.error(error);
                         }
+                    }, {
+                        scheduled: true,
+                        timezone: "Asia/Jakarta"
                     });
                     jobs.push({ id: id, task });
                 } else if (type == "command") {
@@ -125,6 +128,9 @@ if (fs.existsSync('jobsData.json')) {
                         } catch (error) {
                             console.error(error);
                         }
+                    }, {
+                        scheduled: true,
+                        timezone: "Asia/Jakarta"
                     });
                     jobs.push({ id: id, task });
                 }
@@ -251,6 +257,9 @@ app.post('/job', (req, res) => {
             } catch (error) {
                 console.error(error);
             }
+        }, {
+            scheduled: true,
+            timezone: "Asia/Jakarta"
         });
 
         jobs.push({ id: uuid, task });
@@ -281,6 +290,9 @@ app.post('/job', (req, res) => {
             } catch (error) {
                 console.error(error);
             }
+        }, {
+            scheduled: true,
+            timezone: "Asia/Jakarta"
         });
 
         jobs.push({ id: uuid, task });
@@ -453,6 +465,9 @@ app.put('/job/:id', (req, res) => {
                 } catch (error) {
                     console.error(error);
                 }
+            }, {
+                scheduled: true,
+                timezone: "Asia/Jakarta"
             });
 
             // stop task if job status is not running
@@ -489,6 +504,9 @@ app.put('/job/:id', (req, res) => {
                 } catch (error) {
                     console.error(error);
                 }
+            }, {
+                scheduled: true,
+                timezone: "Asia/Jakarta"
             });
 
             jobs.push({ id: uuid, task });
