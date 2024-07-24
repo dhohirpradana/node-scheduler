@@ -24,12 +24,12 @@ var jobsString = [];
 // Function to save jobs data to a JSON file
 function saveJobsToFile() {
     console.log("Jobs:", jobsString);
-    fs.writeFileSync('jobsData.json', JSON.stringify(jobsString), 'utf8');
+    fs.writeFileSync('job/jobsData.json', JSON.stringify(jobsString), 'utf8');
 }
 
 // Load jobs data from a JSON file, if it exists
-if (fs.existsSync('jobsData.json')) {
-    const fileData = fs.readFileSync('jobsData.json', 'utf8');
+if (fs.existsSync('job/jobsData.json')) {
+    const fileData = fs.readFileSync('job/jobsData.json', 'utf8');
     if (fileData) {
         try {
             const parsedData = JSON.parse(fileData);
